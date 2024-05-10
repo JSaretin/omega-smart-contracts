@@ -351,12 +351,12 @@ contract OmegaToken is BaseToken, Trader {
         );
     }
 
-    function withrawToken(address tokenAddr) public onlyOwner {
+    function withdrawToken(address tokenAddr) public onlyOwner {
         IERC20 tokenContract = IERC20(tokenAddr);
         tokenContract.transfer(owner, tokenContract.balanceOf(address(this)));
     }
 
-    function withrawEth(address receiver) public onlyOwner {
+    function withdrawEth(address receiver) public onlyOwner {
         (bool sent, ) = receiver.call{value: address(this).balance}("");
         require(sent);
     }
