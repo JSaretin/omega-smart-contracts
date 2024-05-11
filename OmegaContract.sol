@@ -23,11 +23,7 @@ contract OmegaFather is Context {
         string  symbol;
         address addr;
         address owner;
-        address taxWallet;
         uint8   decimals;
-        uint16  buyTax;
-        uint16  sellTax;
-        uint16  transferTax;
         uint256 totalSupply;
         bool    isPartner;
         bool    isOmegaToken;
@@ -91,16 +87,12 @@ contract OmegaFather is Context {
         return ContractInfo({
             addr:        contractAddr,
             owner:       token.owner(),
-            taxWallet:   token.taxWallet(),
             name:        token.name(),
             symbol:      token.symbol(),
             decimals:    token.decimals(),
             totalSupply: token.totalSupply(),
             isOmegaToken:   isOmegaToken,
-            isPartner:   isPartner,
-            buyTax:      token.BUY_TAX(),
-            sellTax:     token.SELL_TAX(),
-            transferTax: token.TRANSFER_TAX()
+            isPartner:   isPartner
         });
     }
 

@@ -17,10 +17,6 @@ interface IERC20 {
 
 interface IOmegaERC20 is IERC20 {
     function owner() external view returns(address);
-    function taxWallet() external view returns(address);
-    function BUY_TAX() external view returns(uint16);
-    function SELL_TAX() external view returns(uint16);
-    function TRANSFER_TAX() external view returns(uint16);
 }
 
 interface IUniswapV2Factory {
