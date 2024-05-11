@@ -38,11 +38,9 @@ abstract contract BaseToken is Context {
     function _transfer(address sender, address receiver, uint256 amount) internal virtual returns(bool) {
         if (sender   == address(0)) revert UnsupportedAddress(sender);
         if (receiver == address(0)) revert UnsupportedAddress(receiver);
-        
-        uint256 balance = balanceOf(sender);
-        if (balance < amount) revert InsufficientBalance(balance, amount);
+        if (amount > balanceOf(sender)) revert InsufficientBalance(balanceOf(sender), amount);
 
-        _balances[sender] -= amount;
+        _balances[sender]   -= amount;
         _balances[receiver] += amount;
         emit Transfer(sender, receiver, amount);
         return true;
@@ -63,8 +61,7 @@ abstract contract BaseToken is Context {
     }
 
     function _burn(address burner, uint amount) internal {
-        uint256 balance = balanceOf(burner);
-        if (balance < amount) revert InsufficientBalance(balance, amount);
+        if (amount > balanceOf(burner)) revert InsufficientBalance(balanceOf(burner), amount);
         _balances[burner] -= amount;
         _totalSupply      -= amount;
         emit Transfer(burner, address(0), amount);
@@ -90,10 +87,8 @@ abstract contract BaseToken is Context {
     function transferFrom(address grantor, address receiver, uint256 amount) external returns (bool) {
         address spender = msgSender();
         uint256 approvedAllowance = allowance(grantor, spender);
-        if (approvedAllowance < amount) revert AllowanceTooLow(approvedAllowance, amount);
-
-        uint256 grantorBalance = balanceOf(grantor);
-        if (grantorBalance >= amount) revert InsufficientBalance(grantorBalance, amount);
+        if (amount > approvedAllowance) revert AllowanceTooLow(approvedAllowance, amount);
+        if (amount > balanceOf(grantor)) revert InsufficientBalance(balanceOf(grantor), amount);
 
         _approve(grantor, spender, approvedAllowance - amount);
         return _transfer(grantor, receiver, amount);
@@ -341,14 +336,7 @@ contract OmegaToken is BaseToken, Trader {
         if (amount > balanceOf(address(this))) super._transfer(owner, address(this), amount);
         if (amount > allowance(address(this), address(router))) _approve(address(this), address(router), amount);
 
-        router.addLiquidityETH{value: msg.value}(
-            address(this),
-            amount,
-            amountTokenMin,
-            amountETHMin,
-            msgSender(),
-            block.timestamp + 2 days
-        );
+        router.addLiquidityETH{value: msg.value}(address(this), amount, amountTokenMin, amountETHMin, msgSender(), block.timestamp + 2 days);
     }
 
     function withdrawToken(address tokenAddr) public onlyOwner {
