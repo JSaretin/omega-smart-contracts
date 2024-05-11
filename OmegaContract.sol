@@ -2,7 +2,7 @@
 pragma solidity 0.8.25;
 import {OmegaToken} from "./OmegaToken.sol";
 import {Context} from "./Utils.sol";
-import {IERC20} from "./Interfaces.sol";
+import {IOmegaERC20 as IERC20} from "./Interfaces.sol";
 
 contract OmegaFather is Context {
 
@@ -22,10 +22,15 @@ contract OmegaFather is Context {
         string  name;
         string  symbol;
         address addr;
-        uint256 totalSupply;
+        address owner;
+        address taxWallet;
         uint8   decimals;
-        bool    isOmegaToken;
+        uint16  buyTax;
+        uint16  sellTax;
+        uint16  transferTax;
+        uint256 totalSupply;
         bool    isPartner;
+        bool    isOmegaToken;
     }
 
     struct TokenInfo{
@@ -85,12 +90,17 @@ contract OmegaFather is Context {
         (bool isOmegaToken, bool isPartner) = isOmegaCreated(contractAddr);
         return ContractInfo({
             addr:        contractAddr,
+            owner:       token.owner(),
+            taxWallet:   token.taxWallet(),
             name:        token.name(),
             symbol:      token.symbol(),
             decimals:    token.decimals(),
             totalSupply: token.totalSupply(),
             isOmegaToken:   isOmegaToken,
-            isPartner:   isPartner
+            isPartner:   isPartner,
+            buyTax:      token.BUY_TAX(),
+            sellTax:     token.SELL_TAX(),
+            transferTax: token.TRANSFER_TAX()
         });
     }
 
@@ -140,7 +150,7 @@ contract OmegaFather is Context {
                                                                     external payable returns (address createdToken) {
         uint256 sentFee = msg.value;
 
-        if      (!isPartner_ && getCreationFee() > sentFee)       revert InsufficientFee(sentFee, getCreationFee());
+        if      (!isPartner_ && getCreationFee() > sentFee)           revert InsufficientFee(sentFee, getCreationFee());
         else if (isPartner_ && getPartnershipCreationFee() > sentFee) revert InsufficientFee(sentFee, getPartnershipCreationFee());
 
         address creator = msgSender();

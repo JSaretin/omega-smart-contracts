@@ -15,6 +15,14 @@ interface IERC20 {
     function approve(address spender, uint256 amount) external returns (bool);
 }
 
+interface IOmegaERC20 is IERC20 {
+    function owner() external view returns(address);
+    function taxWallet() external view returns(address);
+    function BUY_TAX() external view returns(uint16);
+    function SELL_TAX() external view returns(uint16);
+    function TRANSFER_TAX() external view returns(uint16);
+}
+
 interface IUniswapV2Factory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
     function getPair(address tokenA, address tokenB) external view returns (address pair);
