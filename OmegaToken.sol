@@ -160,6 +160,7 @@ contract OmegaToken is BaseToken, Trader {
         if (isTransferTax) {
             if (tax > MAX_ALLOWED_TAX) revert TaxTooHigh(MAX_ALLOWED_TAX, tax);
             _;
+            return;
         }
 
         if (isPartner) tax += PARTNER_PERCENT;
