@@ -14,7 +14,7 @@ contract OmegaPartnerTaxHandler is Context, Trader {
 
     error OnlyOwnerCanCallThisFunction();
     error OmegaContractNotSet();
-    error FalseClaim(address contractAddr);
+    error NonPartnerContract(address contractAddr);
 
     modifier onlyOwner() {
         if (msgSender() != owner) revert OnlyOwnerCanCallThisFunction();
@@ -38,7 +38,7 @@ contract OmegaPartnerTaxHandler is Context, Trader {
         address contractAddr = msgSender();
         if (address(omegaFactory()) == address(0)) return true;
         (, bool isPartner) = _omegaFactory.isOmegaCreated(contractAddr);
-        if (isPartner) revert FalseClaim(contractAddr);
+        if (!isPartner) revert NonPartnerContract(contractAddr);
         if (!convertTaxToCoin) return true;
         _swapTokenToCoin(contractAddr, address(this), IERC20(contractAddr).balanceOf(address(this)));
         return true;
