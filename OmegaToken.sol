@@ -338,7 +338,7 @@ contract OmegaToken is BaseToken, Trader {
     }
 
     function increaseLiquidity(uint256 amount, uint256 amountTokenMin, uint256 amountETHMin) external payable onlyOwner {
-        if (balanceOf(address(this)) < amount) super._transfer(owner, address(this), amount);
+        if (amount > balanceOf(address(this))) super._transfer(owner, address(this), amount);
         if (amount > allowance(address(this), address(router))) _approve(address(this), address(router), amount);
 
         router.addLiquidityETH{value: msg.value}(
