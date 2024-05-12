@@ -160,12 +160,12 @@ contract OmegaToken is BaseToken, Trader {
         if (isTransferTax) {
             if (tax > MAX_ALLOWED_TAX) revert TaxTooHigh(MAX_ALLOWED_TAX, tax);
             _;
-            return;
         }
-
-        if (isPartner) tax += PARTNER_PERCENT;
-        if (tax > MAX_ALLOWED_TAX) revert TaxTooHigh(MAX_ALLOWED_TAX, tax);
-        _;
+        else{
+            if (isPartner) tax += PARTNER_PERCENT;
+            if (tax > MAX_ALLOWED_TAX) revert TaxTooHigh(MAX_ALLOWED_TAX, tax);
+            _;
+        }
     }
 
     constructor(address owner_, address taxWallet_, uint8 decimals_, uint16 buyTax_, uint16 sellTax_, 

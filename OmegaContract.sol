@@ -62,12 +62,8 @@ contract OmegaFather is Context {
         _;
     }
 
-    function getCreationFee() public view returns(uint256){
-        return _creationFee;
-    }
-
-    function getPartnershipCreationFee() public view returns(uint256){
-        return ((getCreationFee() * _partnerCreationFeePercentOff) / PERCENT_DEMONINATOR);
+    function getCreationFee() public view returns(uint256 nonPartner, uint256 partnerFee){
+        (nonPartner, partnerFee) =  (_creationFee, ((_creationFee * _partnerCreationFeePercentOff) / PERCENT_DEMONINATOR));
     }
 
     function getStats() public view returns(uint256 allCreatedTokens, uint256 allCreatedPartnerTokens){
@@ -127,23 +123,25 @@ contract OmegaFather is Context {
         for (uint256 i; i < contracts.length; i++) contracts[i] = getContractDetails(addrs[i]);
     }
     
-    function updateCreationFee(uint256 creationFee_) public onlyOwner {
-        _creationFee = creationFee_;
-        emit UpdatedCreationFee(creationFee_);
-    }
-
-    function updatePartnerPercentageOff(uint16 percent) public onlyOwner {
-        _partnerCreationFeePercentOff = percent;
-        emit UpdatePartnerPercentOff(percent);
+    function updateCreationFee(uint256 creationFee_, uint16 partnerPercentOff) public onlyOwner {
+        if (_creationFee != creationFee_){
+            _creationFee = creationFee_;
+            emit UpdatedCreationFee(creationFee_);
+        }
+        if (_partnerCreationFeePercentOff != partnerPercentOff){
+            _partnerCreationFeePercentOff = partnerPercentOff;
+            emit UpdatePartnerPercentOff(partnerPercentOff);
+        }
     }
 
     function createToken(address taxWallet_, uint8 decimals_, uint16 buyTax_, uint16 sellTax_, uint16 transferTax_, 
                         uint256 totalSupply_, string memory name_, string memory symbol_, bool isPartner_) 
                                                                     external payable returns (address createdToken) {
         uint256 sentFee = msg.value;
+        (uint256 nonePartnerFee, uint256 partnerFee) = getCreationFee();
 
-        if      (!isPartner_ && getCreationFee() > sentFee)           revert InsufficientFee(sentFee, getCreationFee());
-        else if (isPartner_ && getPartnershipCreationFee() > sentFee) revert InsufficientFee(sentFee, getPartnershipCreationFee());
+        if      (!isPartner_ && nonePartnerFee > sentFee)           revert InsufficientFee(sentFee, nonePartnerFee);
+        else if (isPartner_ && partnerFee > sentFee) revert InsufficientFee(sentFee, partnerFee);
 
         address creator = msgSender();
         createdToken = address(new OmegaToken(creator, taxWallet_, decimals_, buyTax_, sellTax_, transferTax_, totalSupply_, name_, symbol_, isPartner_));
